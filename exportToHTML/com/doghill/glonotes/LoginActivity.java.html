@@ -1,0 +1,111 @@
+<html>
+<head>
+<title>LoginActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+LoginActivity.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<span class="s0">package </span><span class="s1">com.doghill.glonotes; 
+ 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.content.SharedPreferences; 
+</span><span class="s0">import </span><span class="s1">android.preference.PreferenceManager; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.AppCompatActivity; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.view.View; 
+</span><span class="s0">import </span><span class="s1">android.widget.EditText; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.Request; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.RequestQueue; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.Response; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.VolleyError; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.toolbox.StringRequest; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.toolbox.Volley; 
+</span><span class="s0">import </span><span class="s1">org.json.JSONException; 
+</span><span class="s0">import </span><span class="s1">org.json.JSONObject; 
+</span><span class="s0">import </span><span class="s1">java.util.HashMap; 
+</span><span class="s0">import </span><span class="s1">java.util.Map; 
+ 
+</span><span class="s0">public class </span><span class="s1">LoginActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity { 
+    </span><span class="s0">public static final </span><span class="s1">String GET_API_TOKEN_URL = </span><span class="s2">&quot;http://192.168.0.6:8000/api-token-auth/&quot;</span><span class="s1">; 
+   </span><span class="s3">// public static final String GET_API_TOKEN_URL = &quot;http://getbusychild.com:8000/api-token-auth/&quot;;</span><span class="s1"> 
+ 
+    </span><span class="s0">public static final </span><span class="s1">String KEY_USERNAME = </span><span class="s2">&quot;username&quot;</span><span class="s1">; 
+    </span><span class="s0">public static final </span><span class="s1">String KEY_PASSWORD = </span><span class="s2">&quot;password&quot;</span><span class="s1">; 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState); 
+        setContentView(R.layout.activity_login); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sendLoginCredentials(View view) { 
+        EditText mEditUsername = (EditText) findViewById(R.id.editUsername); 
+        EditText mEditPassword = (EditText) findViewById(R.id.editPassword); 
+        </span><span class="s0">final </span><span class="s1">String username = mEditUsername.getText().toString().trim(); 
+        </span><span class="s0">final </span><span class="s1">String password = mEditPassword.getText().toString().trim(); 
+ 
+        StringRequest stringRequest = </span><span class="s0">new </span><span class="s1">StringRequest(Request.Method.POST, GET_API_TOKEN_URL, 
+                </span><span class="s0">new </span><span class="s1">Response.Listener&lt;String&gt;() { 
+                    </span><span class="s3">// Grab API auth response</span><span class="s1"> 
+                    @Override 
+                    </span><span class="s0">public void </span><span class="s1">onResponse(String response) { 
+                        storeAPIKey(response); 
+                    } 
+                }, 
+ 
+                </span><span class="s0">new </span><span class="s1">Response.ErrorListener() { 
+                    @Override 
+                    </span><span class="s0">public void </span><span class="s1">onErrorResponse(VolleyError error) { 
+                    } 
+                }) { 
+ 
+            @Override 
+            </span><span class="s0">protected </span><span class="s1">Map&lt;String, String&gt; getParams() { 
+                Map&lt;String, String&gt; params = </span><span class="s0">new </span><span class="s1">HashMap&lt;String, String&gt;(); 
+                params.put(KEY_USERNAME, username); 
+                params.put(KEY_PASSWORD, password); 
+                </span><span class="s0">return </span><span class="s1">params; 
+            } 
+        }; 
+        RequestQueue requestQueue = Volley.newRequestQueue(</span><span class="s0">this</span><span class="s1">); 
+        requestQueue.add(stringRequest); 
+    } 
+ 
+    </span><span class="s3">// store api key in shared preferences</span><span class="s1"> 
+    </span><span class="s0">public void </span><span class="s1">storeAPIKey(String API_KEY) { 
+        String tokenString = </span><span class="s0">null</span><span class="s1">; 
+ 
+        </span><span class="s0">try </span><span class="s1">{ 
+            JSONObject jsonToken = </span><span class="s0">new </span><span class="s1">JSONObject(API_KEY); 
+            tokenString = jsonToken.getString(</span><span class="s2">&quot;token&quot;</span><span class="s1">); 
+        } 
+ 
+        </span><span class="s0">catch</span><span class="s1">(JSONException e) { 
+        } 
+ 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(</span><span class="s0">this</span><span class="s1">); 
+        SharedPreferences.Editor editor = preferences.edit(); 
+        editor.putString(</span><span class="s2">&quot;glonotes-token&quot;</span><span class="s1">, tokenString); 
+        editor.apply(); 
+ 
+        Intent intent = </span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, MainActivity.</span><span class="s0">class</span><span class="s1">); 
+        finish(); 
+        startActivity(intent); 
+    } 
+} 
+</span></pre>
+</body>
+</html>

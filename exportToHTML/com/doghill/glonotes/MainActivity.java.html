@@ -1,0 +1,293 @@
+<html>
+<head>
+<title>MainActivity.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(128,128,128); font-style: italic; }
+.s4 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+MainActivity.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<span class="s0">package </span><span class="s1">com.doghill.glonotes; 
+ 
+</span><span class="s0">import </span><span class="s1">android.Manifest; 
+</span><span class="s0">import </span><span class="s1">android.content.Context; 
+</span><span class="s0">import </span><span class="s1">android.content.Intent; 
+</span><span class="s0">import </span><span class="s1">android.content.SharedPreferences; 
+</span><span class="s0">import </span><span class="s1">android.location.Location; 
+</span><span class="s0">import </span><span class="s1">android.os.Bundle; 
+</span><span class="s0">import </span><span class="s1">android.os.Handler; 
+</span><span class="s0">import </span><span class="s1">android.preference.PreferenceManager; 
+</span><span class="s0">import </span><span class="s1">android.support.v4.content.ContextCompat; 
+</span><span class="s0">import </span><span class="s1">android.support.v7.app.AppCompatActivity; 
+</span><span class="s0">import </span><span class="s1">android.util.Log; 
+</span><span class="s0">import </span><span class="s1">android.view.View; 
+</span><span class="s0">import </span><span class="s1">android.view.Menu; 
+</span><span class="s0">import </span><span class="s1">android.view.MenuItem; 
+</span><span class="s0">import </span><span class="s1">android.widget.Toast; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.AuthFailureError; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.Request; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.RequestQueue; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.Response; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.VolleyError; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.toolbox.StringRequest; 
+</span><span class="s0">import </span><span class="s1">com.android.volley.toolbox.Volley; 
+</span><span class="s0">import </span><span class="s1">com.google.android.gms.common.ConnectionResult; 
+</span><span class="s0">import </span><span class="s1">com.google.android.gms.common.api.GoogleApiClient; 
+</span><span class="s0">import </span><span class="s1">com.google.android.gms.location.LocationListener; 
+</span><span class="s0">import </span><span class="s1">com.google.android.gms.location.LocationRequest; 
+</span><span class="s0">import </span><span class="s1">com.google.android.gms.location.LocationServices; 
+</span><span class="s0">import </span><span class="s1">java.util.HashMap; 
+</span><span class="s0">import </span><span class="s1">java.util.Map; 
+ 
+</span><span class="s0">public class </span><span class="s1">MainActivity </span><span class="s0">extends </span><span class="s1">AppCompatActivity </span><span class="s0">implements </span><span class="s1">GoogleApiClient.ConnectionCallbacks, 
+        GoogleApiClient.OnConnectionFailedListener, LocationListener { 
+ 
+    </span><span class="s0">private </span><span class="s1">GoogleApiClient mGoogleApiClient; 
+    </span><span class="s0">private </span><span class="s1">LocationRequest mLocationRequest; 
+    </span><span class="s0">private </span><span class="s1">Location old_location = </span><span class="s0">new </span><span class="s1">Location(</span><span class="s2">&quot;Old Location&quot;</span><span class="s1">); 
+    </span><span class="s0">public static final </span><span class="s1">String TAG = MainActivity.</span><span class="s0">class</span><span class="s1">.getSimpleName(); 
+    </span><span class="s0">public </span><span class="s1">String API_KEY = </span><span class="s0">null</span><span class="s1">; 
+    </span><span class="s0">public static final </span><span class="s1">String UPDATE_COORDINATES_URL = </span><span class="s2">&quot;http://192.168.0.6:8000/auth/update_coordinates/&quot;</span><span class="s1">; 
+   </span><span class="s3">// public static final String UPDATE_COORDINATES_URL = &quot;http://getbusychild.com:8000/auth/update_coordinates/&quot;;</span><span class="s1"> 
+ 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onCreate(Bundle savedInstanceState) { 
+        </span><span class="s0">super</span><span class="s1">.onCreate(savedInstanceState); 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(</span><span class="s0">this</span><span class="s1">); 
+ 
+        mGoogleApiClient = </span><span class="s0">new </span><span class="s1">GoogleApiClient.Builder(</span><span class="s0">this</span><span class="s1">) 
+                .addConnectionCallbacks(</span><span class="s0">this</span><span class="s1">) 
+                .addOnConnectionFailedListener(</span><span class="s0">this</span><span class="s1">) 
+                .addApi(LocationServices.API) 
+                .build(); 
+ 
+        </span><span class="s3">// Create the LocationRequest object</span><span class="s1"> 
+        mLocationRequest = LocationRequest.create() 
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY) 
+                .setInterval(</span><span class="s4">10 </span><span class="s1">* </span><span class="s4">6000</span><span class="s1">)        </span><span class="s3">// 10 seconds, in milliseconds</span><span class="s1"> 
+                .setFastestInterval(</span><span class="s4">1 </span><span class="s1">* </span><span class="s4">6000</span><span class="s1">); </span><span class="s3">// 1 second, in milliseconds</span><span class="s1"> 
+ 
+        </span><span class="s3">// if API token exists go to main activity</span><span class="s1"> 
+        </span><span class="s0">if </span><span class="s1">(preferences.contains(</span><span class="s2">&quot;glonotes-token&quot;</span><span class="s1">)) { 
+            API_KEY = getStoredAPIKey(); 
+            setContentView(R.layout.activity_main); 
+        } 
+ 
+        </span><span class="s3">// else if no API  token exists go to login activity</span><span class="s1"> 
+        </span><span class="s0">else </span><span class="s1">{ 
+            Intent intent = </span><span class="s0">new </span><span class="s1">Intent(</span><span class="s0">this</span><span class="s1">, LoginActivity.</span><span class="s0">class</span><span class="s1">); 
+            finish(); 
+            startActivity(intent); 
+        } 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onCreateOptionsMenu(Menu menu) { 
+        </span><span class="s3">// Inflate the menu; this adds items to the action bar if it is present.</span><span class="s1"> 
+        getMenuInflater().inflate(R.menu.menu_main, menu); 
+        </span><span class="s0">return true</span><span class="s1">; 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public boolean </span><span class="s1">onOptionsItemSelected(MenuItem item) { 
+        </span><span class="s3">// Handle action bar item clicks here. The action bar will</span><span class="s1"> 
+        </span><span class="s3">// automatically handle clicks on the Home/Up button, so long</span><span class="s1"> 
+        </span><span class="s3">// as you specify a parent activity in AndroidManifest.xml.</span><span class="s1"> 
+        </span><span class="s0">int </span><span class="s1">id = item.getItemId(); 
+ 
+        </span><span class="s3">//noinspection SimplifiableIfStatement</span><span class="s1"> 
+        </span><span class="s0">if </span><span class="s1">(id == R.id.action_settings) { 
+            </span><span class="s0">return true</span><span class="s1">; 
+        } 
+        </span><span class="s0">return super</span><span class="s1">.onOptionsItemSelected(item); 
+    } 
+ 
+    </span><span class="s0">public </span><span class="s1">String getStoredAPIKey() { 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(</span><span class="s0">this</span><span class="s1">); 
+        String name = preferences.getString(</span><span class="s2">&quot;glonotes-token&quot;</span><span class="s1">, </span><span class="s2">&quot;&quot;</span><span class="s1">); 
+        </span><span class="s0">return </span><span class="s1">name; 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">clearAPIKey() { 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(</span><span class="s0">this</span><span class="s1">); 
+        preferences.edit().remove(</span><span class="s2">&quot;glonotes-token&quot;</span><span class="s1">).apply(); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">glonotesLogout(View view) { 
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, </span><span class="s0">this</span><span class="s1">); 
+        mGoogleApiClient.disconnect(); 
+        clearAPIKey(); 
+        Context context = getApplicationContext(); 
+        Intent intent = </span><span class="s0">new </span><span class="s1">Intent(context, LoginActivity.</span><span class="s0">class</span><span class="s1">); 
+        finish(); 
+        startActivity(intent); 
+ 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sendNewCoordinates(String latitude_string, String longitude_string) { 
+        </span><span class="s0">final </span><span class="s1">String KEY_LATITUDE = </span><span class="s2">&quot;latitude&quot;</span><span class="s1">; 
+        </span><span class="s0">final </span><span class="s1">String KEY_LONGITUDE = </span><span class="s2">&quot;longitude&quot;</span><span class="s1">; 
+        </span><span class="s0">final </span><span class="s1">String API_TOKEN_HEADER = </span><span class="s2">&quot;Token &quot; </span><span class="s1">+ API_KEY; 
+        </span><span class="s0">final </span><span class="s1">String latitude = latitude_string; 
+        </span><span class="s0">final </span><span class="s1">String longitude = longitude_string; 
+ 
+        StringRequest stringRequest = </span><span class="s0">new </span><span class="s1">StringRequest(Request.Method.POST, UPDATE_COORDINATES_URL, 
+                </span><span class="s0">new </span><span class="s1">Response.Listener&lt;String&gt;() { 
+                    @Override 
+                    </span><span class="s0">public void </span><span class="s1">onResponse(String response) { 
+                        Toast toast = Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">, response, Toast.LENGTH_SHORT); 
+                        toast.show(); 
+                    } 
+                }, 
+ 
+                </span><span class="s0">new </span><span class="s1">Response.ErrorListener() { 
+                    @Override 
+                    </span><span class="s0">public void </span><span class="s1">onErrorResponse(VolleyError error) { 
+                        Toast toast = Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">, error.toString(), Toast.LENGTH_SHORT); 
+                        toast.show(); 
+                    } 
+ 
+                }) { 
+ 
+            @Override 
+            </span><span class="s0">protected </span><span class="s1">Map&lt;String, String&gt; getParams() { 
+                Map&lt;String, String&gt; params = </span><span class="s0">new </span><span class="s1">HashMap&lt;String, String&gt;(); 
+                params.put(KEY_LATITUDE, latitude); 
+                params.put(KEY_LONGITUDE, longitude); 
+                </span><span class="s0">return </span><span class="s1">params; 
+            } 
+ 
+            @Override 
+            </span><span class="s0">public </span><span class="s1">Map&lt;String, String&gt; getHeaders() </span><span class="s0">throws </span><span class="s1">AuthFailureError { 
+                Map&lt;String, String&gt;  params = </span><span class="s0">new </span><span class="s1">HashMap&lt;String, String&gt;(); 
+                params.put(</span><span class="s2">&quot;Authorization&quot;</span><span class="s1">, API_TOKEN_HEADER); 
+                </span><span class="s0">return </span><span class="s1">params; 
+            } 
+        }; 
+        RequestQueue requestQueue = Volley.newRequestQueue(</span><span class="s0">this</span><span class="s1">); 
+        requestQueue.add(stringRequest); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onConnected(Bundle bundle) { 
+        </span><span class="s0">int </span><span class="s1">permissionCheck = ContextCompat.checkSelfPermission(MainActivity.</span><span class="s0">this</span><span class="s1">, Manifest.permission.ACCESS_FINE_LOCATION); 
+ 
+        </span><span class="s3">// Check if location permission is granted</span><span class="s1"> 
+        </span><span class="s0">if </span><span class="s1">(permissionCheck == </span><span class="s4">0</span><span class="s1">) { 
+            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient); 
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, </span><span class="s0">this</span><span class="s1">); 
+ 
+            </span><span class="s3">// If location is null</span><span class="s1"> 
+            </span><span class="s0">if </span><span class="s1">(location == </span><span class="s0">null</span><span class="s1">) { 
+            } 
+ 
+            </span><span class="s3">// If location is new</span><span class="s1"> 
+            </span><span class="s0">else </span><span class="s1">{ 
+                handleNewLocation(location); 
+            } 
+        } 
+        </span><span class="s0">else </span><span class="s1">{ 
+            </span><span class="s3">//TODO handle permission not granted</span><span class="s1"> 
+        } 
+    } 
+ 
+    </span><span class="s0">private void </span><span class="s1">handleNewLocation(Location location) { 
+        Log.d(TAG, </span><span class="s2">&quot;Current Location&quot; </span><span class="s1">+ location.toString()); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onConnectionSuspended(</span><span class="s0">int </span><span class="s1">i) { 
+        Log.d(TAG, </span><span class="s2">&quot;Location services suspended. Please reconnect.&quot;</span><span class="s1">); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onConnectionFailed(ConnectionResult connectionResult) { 
+        CharSequence testToast = </span><span class="s2">&quot;location services connection failed&quot;</span><span class="s1">; 
+        Toast toast = Toast.makeText(MainActivity.</span><span class="s0">this</span><span class="s1">, testToast, Toast.LENGTH_SHORT); 
+        toast.show(); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onResume() { 
+        </span><span class="s0">super</span><span class="s1">.onResume(); 
+        CharSequence testToast1 = </span><span class="s2">&quot;location services still connected&quot;</span><span class="s1">; 
+        CharSequence testToast2 = </span><span class="s2">&quot;location services reconnected&quot;</span><span class="s1">; 
+ 
+        </span><span class="s0">if </span><span class="s1">(mGoogleApiClient.isConnected()) { 
+           </span><span class="s3">// Toast toast = Toast.makeText(MainActivity.this, testToast1, Toast.LENGTH_SHORT);</span><span class="s1"> 
+          </span><span class="s3">//  toast.show();</span><span class="s1"> 
+        } 
+ 
+        </span><span class="s0">else </span><span class="s1">{ 
+            mGoogleApiClient.connect(); 
+         </span><span class="s3">//   Toast toast = Toast.makeText(MainActivity.this, testToast2, Toast.LENGTH_SHORT);</span><span class="s1"> 
+         </span><span class="s3">//   toast.show();</span><span class="s1"> 
+        } 
+    } 
+ 
+    @Override 
+    </span><span class="s0">protected void </span><span class="s1">onPause() { 
+        </span><span class="s0">super</span><span class="s1">.onPause(); 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">onLocationChanged(Location location) { 
+        </span><span class="s0">double </span><span class="s1">latitude_double = location.getLatitude(); 
+        </span><span class="s0">double </span><span class="s1">longitude_double = location.getLongitude(); 
+ 
+        String latitude_string = Double.toString(latitude_double); 
+        String longitude_string = Double.toString(longitude_double); 
+ 
+        old_location.setLatitude(latitude_double); 
+        old_location.setLongitude(longitude_double); 
+ 
+        String old_latitude_string = Double.toString(latitude_double); 
+        String old_longitude_string = Double.toString(longitude_double); 
+ 
+        Log.d(TAG, </span><span class="s2">&quot;Old Latitude and longitude are: &quot; </span><span class="s1">+ old_latitude_string + old_longitude_string); 
+        Log.d(TAG, </span><span class="s2">&quot;New Latitude and longitude are: &quot; </span><span class="s1">+ latitude_string + longitude_string); 
+        sendNewCoordinates(latitude_string, longitude_string); 
+    } 
+ 
+    </span><span class="s3">/*    public void startUpdatingCoordinates() { 
+        final Handler mHandler = new Handler(); 
+ 
+        new Thread(new Runnable() { 
+            @Override 
+            public void run() { 
+                while (true) { 
+                    try { 
+                        Thread.sleep(60000); 
+                        mHandler.post(new Runnable() { 
+ 
+                            @Override 
+                            public void run() { 
+                                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this); 
+                                if (preferences.contains(&quot;glonotes-token&quot;)) { 
+                                } 
+                                else { return; } 
+                            } 
+                        }); 
+                    } catch (Exception e) { 
+                        // TODO: handle exception 
+                    } 
+                } 
+            } 
+        }).start(); 
+    }*/</span><span class="s1"> 
+}</span></pre>
+</body>
+</html>
