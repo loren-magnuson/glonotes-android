@@ -2,13 +2,10 @@ package com.doghill.glonotes;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -20,10 +17,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -72,23 +67,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Log.d("new notes length", "new notes length" + Integer.toString(newNotes.size()));
 
                     try {
-
                         JSONObject note = newNotes.get(marker_index);
                         Context context = getApplicationContext();
                         Intent intent = new Intent(context, SingleNoteActivity.class);
                         intent.putExtra("subject", note.getString("subject"));
                         intent.putExtra("textMessage", note.getString("textMessage"));
                         intent.putExtra("author", note.getString("author"));
-                        startActivity(intent);
+                        intent.putExtra("image_filename", note.getString("image_filename"));
+                        intent.putExtra("is_owner", note.getString("is_owner"));
+                        intent.putExtra("note_id", note.getString("note_id"));
 
+
+                        startActivity(intent);
+                        //  Toast toast1 = Toast.makeText(MapsActivity.this, note.toString(), Toast.LENGTH_SHORT);
+                        //  toast1.show();
                     } catch (JSONException e) {
                         Toast toast = Toast.makeText(MapsActivity.this, e.toString(), Toast.LENGTH_SHORT);
                         toast.show();
-
                     }
 
-
                 } else {
+                    //TODO
                 }
             }
         });
@@ -163,6 +162,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void updateMap(List<JSONObject> newNotes) {
         mMap.clear();
+        noteMarkers = new ArrayList<Marker>();
         for (JSONObject note : newNotes) {
 
             try {

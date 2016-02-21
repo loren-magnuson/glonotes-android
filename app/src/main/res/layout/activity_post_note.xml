@@ -77,4 +77,26 @@
         android:layout_alignStart="@+id/textView"
         android:onClick="postNote"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ADD A PHOTO"
+        android:id="@+id/button7"
+        android:layout_marginTop="39dp"
+        android:background="#045191"
+        android:textColor="#fff"
+        android:onClick="dispatchTakePictureIntent"
+        android:layout_below="@+id/button2"
+        android:layout_alignRight="@+id/button2"
+        android:layout_alignEnd="@+id/button2"
+        android:layout_alignLeft="@+id/button2"
+        android:layout_alignStart="@+id/button2" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ReturnedImageView"
+        android:layout_below="@+id/button7"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

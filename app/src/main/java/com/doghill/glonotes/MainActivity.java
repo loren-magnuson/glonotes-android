@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -32,6 +34,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,23 +51,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public static GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-
     private Location old_location = null;
     public static final String TAG = MainActivity.class.getSimpleName();
     public static String API_KEY = null;
     public static String API_TOKEN_HEADER = null;
 
-/*    public static final String UPDATE_COORDINATES_URL = "http://192.168.0.7:8000/auth/update_coordinates/";
+    public static final String USER_REGISTRATION_URL = "http://192.168.0.7:8000/auth/users/register/";
+    public static final String GET_API_TOKEN_URL = "http://192.168.0.7:8000/api-token-auth/";
+    public static final String UPDATE_COORDINATES_URL = "http://192.168.0.7:8000/auth/update_coordinates/";
     public static final String POST_NOTE_URL = "http://192.168.0.7:8000/auth/post_note/";
     public static final String GET_NOTES_URL = "http://192.168.0.7:8000/auth/get_notes/";
     public static final String GET_SINGLE_NOTE_URL = "http://192.168.0.7:8000/auth/get_note/";
-    public static final String GET_API_TOKEN_URL = "http://192.168.0.7:8000/api-token-auth/";*/
+    public static final String MEDIA_ROOT = "http://192.168.0.7:8000/media/";
+    public static final String DELETE_NOTE_URL = "http://192.168.0.7:8000/auth/delete_note/";
 
+
+/*    public static final String USER_REGISTRATION_URL = "http://getbusychild.com:8000/auth/users/register/";
     public static final String GET_API_TOKEN_URL = "http://getbusychild.com:8000/api-token-auth/";
     public static final String UPDATE_COORDINATES_URL = "http://getbusychild.com:8000/auth/update_coordinates/";
     public static final String POST_NOTE_URL = "http://getbusychild.com:8000/auth/post_note/";
     public static final String GET_NOTES_URL = "http://getbusychild.com:8000/auth/get_notes/";
     public static final String GET_SINGLE_NOTE_URL = "http://getbusychild.com:8000/auth/get_note/";
+    public static final String MEDIA_ROOT = "http://getbusychild.com:8000/media/";
+    public static final String DELETE_NOTE_URL = "http://getbusychild.com:8000/auth/delete_note/";
+*/
 
     public static final String KEY_SUBJECT = "subject";
     public static final String KEY_TEXTMESSAGE = "textMessage";
@@ -66,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static final String KEY_LONGITUDE = "longitude";
     public static String latitude = null;
     public static String longitude = null;
-
     public static Location current_location;
     public static Location initial_location;
 
@@ -75,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -184,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("Authorization", API_TOKEN_HEADER);
+                Log.d("param", "params" + params.get("Authorization"));
                 return params;
             }
         };
@@ -367,4 +381,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }).start();
     }*/
+
 }
+
+

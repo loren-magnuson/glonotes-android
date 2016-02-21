@@ -1,0 +1,16 @@
+GloNotes - TODO:
+
+1) Handle server timeout for all connections
+2) Add retry handling for failed posts
+3) Replace note map updated thread with async task
+4) Add button to view note on map to SingleNoteActivity.java
+5) Add email verification to sign up
+6) Add restriction of uploaded filetypes
+7) Add throttling to sign up page
+8) Add progress dialog to Login activity
+9) Create user profile page and avatar image upload
+10) Add first and last name to sign up 
+11) Seriliaze all models
+12) Dispose of singlenoteview onpause/stop
+13) Handler for error downloading image
+14) Handler for error uploading image
